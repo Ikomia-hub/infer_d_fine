@@ -22,6 +22,8 @@ class InferDFineParam(core.CWorkflowTaskParam):
         self.pretrained_dataset = "obj2coco"
         self.update = False
         self.model_weight_file = ""
+        self.config_file = ""
+        self.class_file = ""
 
     def set_values(self, param_map):
         # Set parameters values from Ikomia application
@@ -31,6 +33,8 @@ class InferDFineParam(core.CWorkflowTaskParam):
         self.conf_thres = float(param_map["conf_thres"])
         self.pretrained_dataset = str(param_map["pretrained_dataset"])
         self.model_weight_file = str(param_map["model_weight_file"])
+        self.config_file = str(param_map["config_file"])
+        self.class_file = str(param_map["class_file"])
         self.update = True
 
     def get_values(self):
@@ -43,6 +47,8 @@ class InferDFineParam(core.CWorkflowTaskParam):
         param_map["conf_thres"] = str(self.conf_thres)
         param_map["model_weight_file"] = str(self.model_weight_file)
         param_map["pretrained_dataset"] = str(self.pretrained_dataset)
+        param_map["config_file"] = str(self.config_file)
+        param_map["class_file"] = str(self.class_file)
         param_map["update"] = str(self.update)
         return param_map
 
@@ -70,6 +76,24 @@ class InferDFine(dataprocess.CObjectDetectionTask):
         # Function returning the number of progress steps for this algorithm
         # This is handled by the main progress bar of Ikomia Studio
         return 1
+
+    def set_class_names(self, param):
+        if param.model_weight_file:
+            if not param.config_file:
+                raise ValueError(
+                    "The 'config_file' is required when using a custom model file.")
+            else:
+                # load class names from file .txt
+                with open(param.class_file, 'r') as f:
+                    self.labels = [line.strip() for line in f]
+        else:
+            if param.pretrained_dataset == 'obj365':
+                self.labels = obj365_classes
+            else:
+                # Objects365+COCO means finetuned model on COCO using pretrained weights trained on Objects365.
+                self.labels = coco_classes
+        # Set class names
+        self.set_names(self.labels)
 
     def infer(self, img_array, size):
 
@@ -113,19 +137,10 @@ class InferDFine(dataprocess.CObjectDetectionTask):
             self.device = torch.device(
                 "cuda") if param.cuda and torch.cuda.is_available() else torch.device("cpu")
 
-            if param.model_weight_file:
-                pass
-            else:
-                self.model, self.postprocessor = load_model(param, self.device)
+            self.model, self.postprocessor = load_model(param, self.device)
 
             # Set classe names
-            if param.pretrained_dataset == 'obj365':
-                self.labels = obj365_classes
-            else:
-                # Objects365+COCO means finetuned model on COCO using pretrained weights trained on Objects365.
-                self.labels = coco_classes
-
-            self.set_names(self.labels)
+            self.set_class_names(param)
             param.update = False
 
         labels, boxes, scores = self.infer(src_image, param.input_size)
@@ -198,12 +213,6 @@ class InferDFineFactory(dataprocess.CTaskFactory):
         self.info.keywords = "DETR, object, detection, real-time"
         self.info.algo_type = core.AlgoType.INFER
         self.info.algo_tasks = "OBJECT_DETECTION"
-
-        # Algorithms tasks: CLASSIFICATION, COLORIZATION, IMAGE_CAPTIONING, IMAGE_GENERATION,
-        # IMAGE_MATTING, INPAINTING, INSTANCE_SEGMENTATION, KEYPOINTS_DETECTION,
-        # OBJECT_DETECTION, OBJECT_TRACKING, OCR, OPTICAL_FLOW, OTHER, PANOPTIC_SEGMENTATION,
-        # SEMANTIC_SEGMENTATION or SUPER_RESOLUTION
-        # self.info.algo_tasks = "OTHER"
 
     def create(self, param=None):
         # Create algorithm object

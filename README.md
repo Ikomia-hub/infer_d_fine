@@ -74,7 +74,13 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 - **input_size** (int) - default '640': Size of the input image.
 - **conf_thres** (float) default '0.5': Box threshold for the prediction [0,1].
 - **cuda** (bool): If True, CUDA-based inference (GPU). If False, run on CPU.
+
+
+**To load a custom model weights fine-tuned with the _train_d_fine_ algorithm:**
+The following file can be found in the train output directory
 - **model_weight_file** (str, *optional*): Path to model weights file .pth. 
+- **config_file** (str, *optional*): Path to config file .yaml.
+- **class_file** (str, *optional*): Path to class file .txt.
 
 **Parameters** should be in **strings format**  when added to the dictionary.
 

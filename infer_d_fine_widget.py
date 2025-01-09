@@ -50,7 +50,7 @@ class InferDFineWidget(core.CWorkflowTaskWidget):
 
         self.combo_dataset.setCurrentText(self.parameters.pretrained_dataset)
 
-        # Hyper-parameters
+        # Hyper-parameters for custom weight
         custom_weight = bool(self.parameters.model_weight_file)
         self.check_cfg = QCheckBox("Custom model")
         self.check_cfg.setChecked(custom_weight)
@@ -58,18 +58,46 @@ class InferDFineWidget(core.CWorkflowTaskWidget):
             self.check_cfg, self.grid_layout.rowCount(), 0, 1, 2)
         self.check_cfg.stateChanged.connect(self.on_custom_weight_changed)
 
+        # Model weight file selection
         self.label_hyp = QLabel("Model weight (.pt)")
         self.browse_weight_file = pyqtutils.BrowseFileWidget(
             path=self.parameters.model_weight_file,
-            tooltip="Select file",
+            tooltip="Select model weight file",
             mode=QFileDialog.ExistingFile
         )
         row = self.grid_layout.rowCount()
         self.grid_layout.addWidget(self.label_hyp, row, 0)
         self.grid_layout.addWidget(self.browse_weight_file, row, 1)
 
+        # Config file selection
+        self.label_config_file = QLabel("Config file (.yaml)")
+        self.browse_config_file = pyqtutils.BrowseFileWidget(
+            path=self.parameters.config_file,
+            tooltip="Select config file",
+            mode=QFileDialog.ExistingFile
+        )
+        row = self.grid_layout.rowCount()
+        self.grid_layout.addWidget(self.label_config_file, row, 0)
+        self.grid_layout.addWidget(self.browse_config_file, row, 1)
+
+        # Class file selection
+        self.label_class_file = QLabel("Class file (.txt)")
+        self.browse_class_file = pyqtutils.BrowseFileWidget(
+            path=self.parameters.class_file,
+            tooltip="Select class file",
+            mode=QFileDialog.ExistingFile
+        )
+        row = self.grid_layout.rowCount()
+        self.grid_layout.addWidget(self.label_class_file, row, 0)
+        self.grid_layout.addWidget(self.browse_class_file, row, 1)
+
+        # Ensure visibility based on custom weight toggle
         self.label_hyp.setVisible(custom_weight)
         self.browse_weight_file.setVisible(custom_weight)
+        self.label_config_file.setVisible(custom_weight)
+        self.browse_config_file.setVisible(custom_weight)
+        self.label_class_file.setVisible(custom_weight)
+        self.browse_class_file.setVisible(custom_weight)
 
         # Confidence threshold
         self.spin_conf_thres = pyqtutils.append_double_spin(
@@ -98,9 +126,12 @@ class InferDFineWidget(core.CWorkflowTaskWidget):
     def on_custom_weight_changed(self, int):
         self.label_hyp.setVisible(self.check_cfg.isChecked())
         self.browse_weight_file.setVisible(self.check_cfg.isChecked())
+        self.label_config_file.setVisible(self.check_cfg.isChecked())
+        self.browse_config_file.setVisible(self.check_cfg.isChecked())
+        self.label_class_file.setVisible(self.check_cfg.isChecked())
+        self.browse_class_file.setVisible(self.check_cfg.isChecked())
 
     def on_apply(self):
-        # Apply button clicked slot
         self.parameters.model_name = self.combo_model.currentText()
         self.parameters.combo_dataset = self.combo_dataset.currentText()
         self.parameters.cuda = self.check_cuda.isChecked()
@@ -108,9 +139,9 @@ class InferDFineWidget(core.CWorkflowTaskWidget):
         self.parameters.conf_thres = self.spin_conf_thres.value()
         if self.check_cfg.isChecked():
             self.parameters.model_weight_file = self.browse_weight_file.path
+            self.parameters.config_file = self.browse_config_file.path
+            self.parameters.class_file = self.browse_class_file.path
         self.parameters.update = True
-
-        # Send signal to launch the algorithm main function
         self.emit_apply(self.parameters)
 
 
