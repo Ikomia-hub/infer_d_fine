@@ -62,7 +62,7 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 
 ## :pencil: Set algorithm parameters
 
-- **model_name** (str) - default 'dfine_m': Name of the YOLOv11 pre-trained model. Other model available:
+- **model_name** (str) - default 'dfine_m': Name of the D-FINE pre-trained model. Other model available:
     - dfine_n
     - dfine_s
     - dfine_l
