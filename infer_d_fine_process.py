@@ -194,13 +194,8 @@ class InferDFineFactory(dataprocess.CTaskFactory):
         self.info.year = 2024
         self.info.license = "Apache 2.0"
 
-        # Ikomia API compatibility
-        # self.info.min_ikomia_version = "0.11.1"
-        # self.info.max_ikomia_version = "0.11.1"
-
         # Python compatibility
-        # self.info.min_python_version = "3.10.0"
-        # self.info.max_python_version = "3.11.0"
+        self.info.min_python_version = "3.11.0"
 
         # URL of documentation
         self.info.documentation_link = "https://arxiv.org/pdf/2410.13842"
