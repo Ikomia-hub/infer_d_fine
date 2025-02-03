@@ -12,10 +12,6 @@ def get_config_path(root_dir, model_name, dataset):
     # Define the base configuration directory
     root_config = os.path.join(root_dir, "D_FINE", "configs", "dfine")
 
-    # Handle the case where model_size is 'n' and it's not a coco dataset
-    if model_size == 'n' and dataset != "coco":
-        raise ValueError("Model size 'n' is only valid for the coco dataset.")
-
     # Determine the appropriate configuration file based on the dataset
     if dataset == "obj2coco":
         config_file = os.path.join(
@@ -47,6 +43,12 @@ def load_model(param, device):
         cfg = load_custom_config(param.config_file)
     # Load from pre-trained
     else:
+        # Handle the case where model_size is 'n' and it's not a coco dataset
+        model_size = param.model_name[-1]
+        dataset = param.pretrained_dataset
+        if model_size == 'n' and dataset != "coco":
+            raise ValueError(
+                "MODEL_SIZE 'n' IS ONLY SUPPORTED FOR COCO DATASET")
         current_dir = os.path.dirname(os.path.realpath(__file__))
         root_dir = os.path.dirname(current_dir)
         model_folder = os.path.join(root_dir, "weights")
@@ -58,7 +60,9 @@ def load_model(param, device):
 
         # Check if the model file exists, download if not
         if not os.path.isfile(model_weights):
-            url = f'https://github.com/Peterande/storage/releases/download/dfinev1.0/{param.model_name}_{param.pretrained_dataset}.pth'
+            if model_size == 'l' and dataset != "coco":
+                dataset = dataset + "_e25"
+            url = f'https://github.com/Peterande/storage/releases/download/dfinev1.0/{param.model_name}_{dataset}.pth'
             print(f"Downloading model from {url}...")
             try:
                 urllib.request.urlretrieve(url, model_weights)
