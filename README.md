@@ -55,15 +55,13 @@ display(algo.get_image_with_graphics())
 ## :sunny: Use with Ikomia Studio
 
 Ikomia Studio offers a friendly UI with the same features as the API.
-
 - If you haven't started using Ikomia Studio yet, download and install it from [this page](https://www.ikomia.ai/studio).
-
 - For additional guidance on getting started with Ikomia Studio, check out [this blog post](https://www.ikomia.ai/blog/how-to-get-started-with-ikomia-studio).
 
 ## :pencil: Set algorithm parameters
 
 - **model_name** (str) - default 'dfine_m': Name of the D-FINE pre-trained model. Other model available:
-    - dfine_n
+    - dfine_n (only for the coco pre-trained model)
     - dfine_s
     - dfine_l
     - dfine_x
